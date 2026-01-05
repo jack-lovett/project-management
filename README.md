@@ -1,146 +1,151 @@
-# Welcome to StackEdit!
+# Project Name
 
-Hi! I'm your first Markdown file in **StackEdit**. If you want to learn about StackEdit, you can read me. If you want to play with Markdown, you can edit me. Once you have finished with me, you can create new files by opening the **file explorer** on the left corner of the navigation bar.
+AI Use Case Register — Power Apps (Dataverse-backed)
 
+# Purpose
 
-# Files
+Replace the existing Microsoft Lists-based register with a Dataverse + Power Apps solution to improve data integrity, governance, relational modeling, automation, and reporting. Provide an intuitive UI for registering, reviewing, assuring, and monitoring AI use cases across lifecycle stages and risk domains.
 
-StackEdit stores your files in your browser, which means all your files are automatically saved locally and are accessible **offline!**
+# Objectives
 
-## Create files and folders
+-   Centralize and standardize AI use case data (owners, status, lifecycle, risk ratings, domains, patterns, tech type).
+-   Enable assurance workflows, auditability, and review cycles (last/next review).
+-   Provide insightful dashboards (counts by lifecycle, risk distribution, domains/patterns, ownership).
+-   Support governance processes (Assure & Align, legal checks, standards compliance).
+-   Improve findability & navigation (active list, search/filter, shortcuts to resources/links).
 
-The file explorer is accessible using the button in left corner of the navigation bar. You can create a new file by clicking the **New file** button in the file explorer. You can also create folders by clicking the **New folder** button.
+# Scope
 
-## Switch to another file
+-   Canvas app UI built from a Figma mock-up (converted manually).
+-   Core screens: Active list, use case create/edit, detailed view, dashboards, admin/reference management.
+-   Robust ID strategy (business-facing Use Case Number) and core automations (status-driven timeline, review reminders).
+-   Role-based experiences (viewers vs editors vs admins).
 
-All your files and folders are presented as a tree in the file explorer. You can switch from one to another by clicking a file in the tree.
+# Out of scope (for v1; can be v1.x/v2)
 
-## Rename a file
+-   Advanced generative UI planning tools.
+-   Complex PCF controls (unless needed later).
+-   External system integrations beyond Microsoft 365 (except links).
 
-You can rename the current file by clicking the file name in the navigation bar or by clicking the **Rename** button in the file explorer.
+# Data model notes
 
-## Delete a file
+-   Use Case is the central entity with multiple lookups and two N:N relationships (Domains, Usage Patterns).
+-   Ratings, Status, Stages, Tech Types are reference tables (maintained by admins).
+-   Owners may use Dataverse users or a dedicated People table (to be confirmed).
+-   Store assurance metadata (Assure & Align, legal flags, links, outcomes) directly on Use Case.
 
-You can delete the current file by clicking the **Remove** button in the file explorer. The file will be moved into the **Trash** folder and automatically deleted after 7 days of inactivity.
+# ID strategy
 
-## Export a file
+-   Keep GUID as primary key.
+-   Business ID: Dataverse Autonumber (preferred) with format UC-YYYY-###### or similar.
+-   If you need fiscal-year reset or special rules: implement via Power Automate or Power Fx Function (server-side) and write back to the ID column.
 
-You can export the current file by clicking **Export to disk** in the menu. You can choose to export the file as plain Markdown, as HTML using a Handlebars template or as a PDF.
+# Automation & governance
 
+-   On create: assign Use Case Number; create SharePoint/Teams folder (if required); initial timeline entry.
+-   On status/stage change: append timeline entries; optionally send notifications.
+-   Review cycle: compute next review date; reminders via Power Automate.
+-   Assure & Align: capture result and links; optionally enforce field requirements by stage.
 
-# Synchronization
+# UX principles
 
-Synchronization is one of the biggest features of StackEdit. It enables you to synchronize any file in your workspace with other files stored in your **Google Drive**, your **Dropbox** and your **GitHub** accounts. This allows you to keep writing on other devices, collaborate with people you share the file with, integrate easily into your workflow... The synchronization mechanism takes place every minute in the background, downloading, merging, and uploading file modifications.
+-   Task-first navigation (find, view, edit, assure, review).
+-   Responsive layout using nested containers.
+-   Clear distinction between list → details → edit flows.
+-   Filters & search readily available; save common views.
+-   Accessibility and readability over heavy decoration.
 
-There are two types of synchronization and they can complement each other:
+# Non-functional requirements
 
-- The workspace synchronization will sync all your files, folders and settings automatically. This will allow you to fetch your workspace on any other device.
-	> To start syncing your workspace, just sign in with Google in the menu.
+-   Performance: efficient queries and pagination in galleries.
+-   Security: role-based permissions; field-level validation.
+-   Maintainability: component library, reusable formulas/functions.
+-   Auditability: timeline events, last/next review tracking.
 
-- The file synchronization will keep one file of the workspace synced with one or multiple files in **Google Drive**, **Dropbox** or **GitHub**.
-	> Before starting to sync files, you must link an account in the **Synchronize** sub-menu.
+# Why AI assistance is engaged
 
-## Open a file
+-   Structure and iterate the design plan, screen map, data modeling decisions, and automation patterns.
+-   Generate Power Fx snippets, flow outlines, and component patterns.
+-   Act as a memory of decisions, constraints, and rationale (this context package), and provide checklists for build & review.
 
-You can open a file from **Google Drive**, **Dropbox** or **GitHub** by opening the **Synchronize** sub-menu and clicking **Open from**. Once opened in the workspace, any modification in the file will be automatically synced.
+# Entity Relationship Diagram
 
-## Save a file
+Table: Use Case
 
-You can save any file of the workspace to **Google Drive**, **Dropbox** or **GitHub** by opening the **Synchronize** sub-menu and clicking **Save on**. Even if a file in the workspace is already synced, you can save it to another location. StackEdit can sync one file with multiple locations and accounts.
+-   Primary Key (PK): ID (GUID; system primary key)
+-   Columns (selected):
 
-## Synchronize a file
+-   Title
+-   Description
+-   Business Need
+-   Purpose
+-   Expected Benefits
+-   Lookup: Use Case Status → Use Case Status (1:N)
+-   Lookup: Lifecycle Stage → Use Case Lifecycle Stage (1:N)
+-   Many-to-Many: Use Case Domain ↔ via Dataverse auto-intersect table (N:N)
+-   Many-to-Many: Use Case Usage Pattern ↔ via Dataverse auto-intersect table (N:N)
+-   Lookup: Use Case Officer (person/owner)
+-   Accountable Use Case Owner
+-   Branch
+-   Division
+-   Assurance Officer
+-   Review Status
+-   Lookup: AI Technology Type → AI Technology Type (1:N)
+-   Technical Standard Usage
+-   Inherent Risk Rating → Use Case Risk Rating (1:N)
+-   Residual Risk Rating → Use Case Risk Rating (1:N)
+-   Other Risk Domain (text/lookup)
+-   Other Risk Domain Rating → Use Case Risk Rating (1:N)
+-   Is SaaS Product (boolean)
+-   Been to Legal (boolean)
+-   Assure and Align (boolean)
+-   Assure and Align Link (URL)
+-   Assure and Align Outcome (text)
+-   DTA Lifecycle Stage (text/choice)
+-   Last Review Date (date)
+-   Next Review Date (date)
+-   Case Notes (multiline)
+-   CM9 Link (URL)
 
-Once your file is linked to a synchronized location, StackEdit will periodically synchronize it by downloading/uploading any modification. A merge will be performed if necessary and conflicts will be resolved.
+Table: Use Case Status
 
-If you just have modified your file and you want to force syncing, click the **Synchronize now** button in the navigation bar.
+-   PK: Status Name
+-   Description
 
-> **Note:** The **Synchronize now** button is disabled if you have no file to synchronize.
+Table: Use Case Lifecycle Stage
 
-## Manage file synchronization
+-   PK: Stage Name
+-   Description
 
-Since one file can be synced with multiple locations, you can list and manage synchronized locations by clicking **File synchronization** in the **Synchronize** sub-menu. This allows you to list and remove synchronized locations that are linked to your file.
+Table: Use Case Risk Rating
 
+-   PK: Rating Name
+-   Description
 
-# Publication
+Table: Use Case Domain
 
-Publishing in StackEdit makes it simple for you to publish online your files. Once you're happy with a file, you can publish it to different hosting platforms like **Blogger**, **Dropbox**, **Gist**, **GitHub**, **Google Drive**, **WordPress** and **Zendesk**. With [Handlebars templates](http://handlebarsjs.com/), you have full control over what you export.
+-   PK: Domain Name
+-   Description
+-   Relationship: N:N with Use Case (auto-intersect Dataverse table)
 
-> Before starting to publish, you must link an account in the **Publish** sub-menu.
+Table: Use Case Usage Pattern
 
-## Publish a File
+-   PK: Pattern Name
+-   Description
+-   Relationship: N:N with Use Case (auto-intersect Dataverse table)
 
-You can publish your file by opening the **Publish** sub-menu and by clicking **Publish to**. For some locations, you can choose between the following formats:
+Table: AI Technology Type
 
-- Markdown: publish the Markdown text on a website that can interpret it (**GitHub** for instance),
-- HTML: publish the file converted to HTML via a Handlebars template (on a blog for example).
+-   PK: Technology Name
+-   Description
+-   Relationship: 1:N referenced by Use Case
 
-## Update a publication
+Relationship summary:
 
-After publishing, StackEdit keeps your file linked to that publication which makes it easy for you to re-publish it. Once you have modified your file and you want to update your publication, click on the **Publish now** button in the navigation bar.
-
-> **Note:** The **Publish now** button is disabled if your file has not been published yet.
-
-## Manage file publication
-
-Since one file can be published to multiple locations, you can list and manage publish locations by clicking **File publication** in the **Publish** sub-menu. This allows you to list and remove publication locations that are linked to your file.
-
-
-# Markdown extensions
-
-StackEdit extends the standard Markdown syntax by adding extra **Markdown extensions**, providing you with some nice features.
-
-> **ProTip:** You can disable any **Markdown extension** in the **File properties** dialog.
-
-
-## SmartyPants
-
-SmartyPants converts ASCII punctuation characters into "smart" typographic punctuation HTML entities. For example:
-
-|                |ASCII                          |HTML                         |
-|----------------|-------------------------------|-----------------------------|
-|Single backticks|`'Isn't this fun?'`            |'Isn't this fun?'            |
-|Quotes          |`"Isn't this fun?"`            |"Isn't this fun?"            |
-|Dashes          |`-- is en-dash, --- is em-dash`|-- is en-dash, --- is em-dash|
-
-
-## KaTeX
-
-You can render LaTeX mathematical expressions using [KaTeX](https://khan.github.io/KaTeX/):
-
-The *Gamma function* satisfying $\Gamma(n) = (n-1)!\quad\forall n\in\mathbb N$ is via the Euler integral
-
-$$
-\Gamma(z) = \int_0^\infty t^{z-1}e^{-t}dt\,.
-$$
-
-> You can find more information about **LaTeX** mathematical expressions [here](http://meta.math.stackexchange.com/questions/5020/mathjax-basic-tutorial-and-quick-reference).
-
-
-## UML diagrams
-
-You can render UML diagrams using [Mermaid](https://mermaidjs.github.io/). For example, this will produce a sequence diagram:
-
-```mermaid
-sequenceDiagram
-Alice ->> Bob: Hello Bob, how are you?
-Bob-->>John: How about you John?
-Bob--x Alice: I am good thanks!
-Bob-x John: I am good thanks!
-Note right of John: Bob thinks a long<br/>long time, so long<br/>that the text does<br/>not fit on a row.
-
-Bob-->Alice: Checking with John...
-Alice->John: Yes... John, how are you?
-```
-
-And this will produce a flow chart:
-
-```mermaid
-graph LR
-A[Square Rect] -- Link text --> B((Circle))
-A --> C(Round Rect)
-B --> D{Rhombus}
-C --> D
-```
+-   Use Case ↔ Use Case Domain: N:N
+-   Use Case ↔ Use Case Usage Pattern: N:N
+-   Use Case → Status / Lifecycle Stage / Risk Rating / AI Technology Type: 1:N lookups
+-   People/owners are represented as lookups (specific implementation can be Dataverse user table or a custom People/Contacts table, depending on your environment).
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTMzMjQ1NTM2M119
+eyJoaXN0b3J5IjpbMTM2NTA0NTk3LC0zMzI0NTUzNjNdfQ==
 -->
